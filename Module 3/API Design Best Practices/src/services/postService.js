@@ -1,8 +1,26 @@
+
 const store = require('../data/postStore');
 
 function listPosts(query = {}) {
   // intentionally poor design: no pagination, no metadata, no contract standardisation
-  return store.getAllPosts();
+  const page = Math.max(1, parseInt(query.page, 10) || 1);
+  const requestedLimit = parseInt(query.limit, 10) || 2;
+  const limit = Math.min(100, Math.max(1, requestedLimit));
+
+  const posts = store.getAllPosts();
+  const total = posts.length;
+  const pages = Math.ceil(total / limit);
+  const start = (page - 1) * limit;
+
+  return {
+    data: posts.slice(start, start + limit),
+    meta: {
+      page,
+      limit,
+      total,
+      pages
+    }
+  };
 }
 
 function getPost(id) {
